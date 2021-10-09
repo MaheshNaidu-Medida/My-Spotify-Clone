@@ -1,0 +1,130 @@
+.navbar-container {
+  display: flex;
+  flex-direction: column;
+}
+@media screen and (min-width: 768px) {
+  .navbar-container {
+    flex-direction: row;
+    align-self: stretch;
+  }
+}
+/* Navbar for small and medium devices */
+
+.navbar-mobile {
+  position: fixed;
+  width: 100%;
+  background-color: #040306;
+  padding: 15px 25px 15px 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@media screen and (min-width: 768px) {
+  .navbar-mobile {
+    display: none;
+  }
+}
+.navbar-mobile-no-menu {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navbar-mobile-menu {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navbar-mobile-logo {
+  width: 60px;
+  height: 20px;
+}
+.navbar-mobile-icon {
+  font-size: 18px;
+  color: #ffffff;
+}
+.navbar-button {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+}
+.link-item-mobile {
+  text-decoration: none;
+  padding: 0;
+  margin: 0;
+}
+/* Navbar large devices  */
+.navbar-desktop {
+  display: none;
+}
+@media screen and (min-width: 768px) {
+  .navbar-desktop {
+    width: 80px;
+    min-height: 100vh;
+    background: #040306;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .link-item {
+    text-decoration: none;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .navbar-desktop-logo {
+    width: 90%;
+    filter: brightness(110%);
+  }
+  .navbar-desktop-logo:hover {
+    filter: brightness(150%);
+  }
+  .navbar-desktop-main {
+    min-height: 95vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .navbar-desktop-menu {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .link-item-menu-icon {
+    text-decoration: none;
+    color: #9b9b9b;
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  .link-item-menu-icon:hover {
+    background: #181818;
+    color: #ffffff;
+  }
+  .link-item-menu-current {
+    background: #181818;
+    border-left: 6px solid #1ed760;
+    color: #ffffff;
+  }
+  .navbar-desktop-icon {
+    font-size: 20px;
+    margin-top: 9px;
+  }
+  .navbar-desktop-icon-text {
+    font-family: 'Roboto';
+    font-size: 12px;
+    line-height: 10px;
+  }
+}

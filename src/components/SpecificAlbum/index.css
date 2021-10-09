@@ -1,0 +1,305 @@
+.specific-album-container {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+}
+.specific-album-container-mobile {
+  background-color: #181818;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+@media screen and (max-width: 768px) {
+  .specific-album-container-desktop {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .specific-album-container-mobile {
+    display: none;
+  }
+  .specific-album-container-desktop {
+    display: block;
+    background-color: #181818;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+.specific-album-main {
+  display: none;
+}
+@media screen and (min-width: 768px) {
+  .specific-album-main {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 18px 0 40px 0;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.specific-album-back-button {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding-left: 32px;
+}
+.specific-album-back-button:hover {
+  filter: brightness(500%);
+  transform: scale(1.1);
+}
+.arrow-icon {
+  font-size: 22px;
+  color: #ffffff;
+  margin-right: 6px;
+}
+.text-color-1 {
+  color: #f8fafc;
+}
+.text-color-2 {
+  color: #ffffff;
+}
+.text-color-3 {
+  color: #64748b;
+}
+.text-color-4 {
+  color: #94a3b8;
+}
+.text-color-5 {
+  color: #9b9b9b;
+}
+.specific-album-text {
+  font-family: 'Roboto';
+  font-size: 14px;
+}
+
+.specific-album-header {
+  width: 100%;
+  padding-left: 32px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-end;
+}
+.specific-album-header-image {
+  width: 236px;
+  height: 236px;
+  border-radius: 8px;
+}
+.specific-album-header-image:hover {
+  filter: brightness(120%);
+  filter: contrast(110%);
+  transform: scale(1.05);
+}
+.specific-album-no-header-preview {
+  width: 136px;
+  height: 136px;
+  border-radius: 6px;
+  background-color: #282828;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@media screen and (min-width: 768px) {
+  .specific-album-no-header-preview {
+    width: 236px;
+    height: 236px;
+    border-radius: 6px;
+  }
+}
+
+.specific-album-no-header-preview-icon {
+  font-size: 38px;
+  color: #ffffff;
+}
+@media screen and (min-width: 768px) {
+  .specific-album-no-header-preview {
+    width: 236px;
+    height: 236px;
+    border-radius: 8px;
+  }
+  .your-selected-playlist-no-header-preview-icon {
+    font-size: 44px;
+  }
+}
+.specific-album-details {
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.specific-album-heading {
+  font-family: 'Roboto';
+  font-size: 38px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+.first-one {
+  margin-bottom: 0;
+}
+.second-one {
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+.specific-album-track-header {
+  width: 100%;
+  padding-left: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.specific-album-tracks-container {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.specific-album-track {
+  width: 100%;
+  padding-left: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.specific-album-track:hover {
+  background-color: #303030;
+  cursor: pointer;
+  transform: scale(1, 1.1);
+  filter: brightness(120%);
+}
+.specific-album-selected-track {
+  background-color: #303030;
+}
+
+.specific-album-rule {
+  width: 96%;
+  border: 1px solid #475569;
+  background-color: #475569;
+}
+.specific-album-index-item {
+  width: 2%;
+}
+.specific-album-track-item {
+  width: 30%;
+}
+.specific-album-time-item {
+  width: 30%;
+}
+.specific-album-popularity-item {
+  width: 30%;
+}
+
+.no-tracks-view {
+  width: 100%;
+  min-height: 20vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Specific Playlist Mobile Version */
+.specific-album-main-mobile {
+  width: 100%;
+  height: 100%;
+  padding: 18px 0 40px 0;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+@media screen and (min-width: 768px) {
+  .specific-album-main-mobile {
+    display: none;
+  }
+}
+
+.specific-album-back-btn-mobile {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding-left: 27px;
+}
+.specific-album-back-btn-mobile:hover {
+  filter: brightness(500%);
+  transform: scale(1.1);
+}
+.specific-album-arrow-mobile {
+  font-size: 18px;
+  color: #ffffff;
+  margin-right: 4px;
+}
+.specific-album-text-mobile {
+  font-family: 'Roboto';
+  font-size: 12px;
+}
+.specific-album-header-mobile {
+  width: 100%;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.specific-album-header-image-mobile {
+  width: 136px;
+  height: 136px;
+  border-radius: 6px;
+}
+.specific-album-header-image-mobile:hover {
+  filter: brightness(110%);
+  filter: contrast(110%);
+  transform: scale(1.05);
+}
+.specific-album-heading-mobile {
+  font-family: 'Roboto';
+  font-size: 24px;
+  text-align: center;
+}
+.specific-album-tracks-mobile {
+  list-style-type: none;
+  margin: 0;
+  padding-left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.specific-album-track-mobile {
+  width: 100%;
+  padding-left: 27px;
+  padding-right: 27px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.specific-album-track-mobile:hover {
+  background-color: #303030;
+  cursor: pointer;
+  transform: scale(1, 1.08);
+  filter: brightness(120%);
+}
+.specific-album-track-details-mobile {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.specific-album-track-name-mobile {
+  font-family: 'Roboto';
+  font-size: 14px;
+  margin-bottom: 0;
+}

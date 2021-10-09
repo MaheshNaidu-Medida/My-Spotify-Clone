@@ -1,0 +1,337 @@
+.your-music-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #181818;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+@media screen and (min-width: 768px) {
+  .your-music-container {
+    flex-direction: row;
+  }
+}
+.your-music-main {
+  width: 100%;
+  display: flex;
+  padding: 18px 0px 5px 0px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.your-music-header {
+  display: flex;
+  align-items: center;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  padding-left: 27px;
+}
+@media screen and (min-width: 768px) {
+  .your-music-header {
+    margin-top: 30px;
+    padding-left: 32px;
+  }
+}
+.your-music-counter {
+  width: 25px;
+  background-color: #ffffff;
+  color: #181818;
+  font-family: 'Roboto';
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px;
+  border-radius: 30px;
+  margin-left: 10px;
+  text-align: center;
+}
+@media screen and (min-width: 768px) {
+  .your-music-counter {
+    width: 30px;
+    font-size: 18px;
+    padding: 4px;
+    border-radius: 30px;
+  }
+}
+.your-music-heading {
+  color: #ffffff;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: bold;
+  font-size: 22px;
+  line-height: 32px;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+@media screen and (min-width: 768px) {
+  .your-music-heading {
+    font-size: 24px;
+  }
+}
+
+.text-color-1 {
+  color: #f8fafc;
+}
+.text-color-2 {
+  color: #ffffff;
+}
+.text-color-3 {
+  color: #64748b;
+}
+.text-color-4 {
+  color: #94a3b8;
+}
+.text-color-5 {
+  color: #9b9b9b;
+}
+.your-music-tracks {
+  width: 100%;
+  list-style-type: none;
+  padding-left: 0px;
+  margin-top: 0;
+  margin-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.your-music-track {
+  width: 100%;
+  padding-left: 27px;
+  padding-right: 27px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  height: 80px;
+}
+@media screen and (min-width: 768px) {
+  .your-music-track {
+    display: none;
+  }
+}
+.your-music-track:hover {
+  background-color: #303030;
+  cursor: pointer;
+  transform: scale(1, 1.08);
+  filter: brightness(120%);
+}
+
+.your-music-track-desktop {
+  display: none;
+}
+@media screen and (min-width: 768px) {
+  .your-music-tracks {
+    margin-bottom: 55px;
+  }
+
+  .your-music-track-desktop {
+    width: 100%;
+    padding-left: 32px;
+    padding-right: 32px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+  }
+}
+.your-music-track-desktop:hover {
+  background-color: #303030;
+  cursor: pointer;
+  transform: scale(1, 1.08);
+  filter: brightness(120%);
+}
+
+.your-music-track-header {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+.your-music-track-no-image {
+  width: 60px;
+  height: 60px;
+  background-color: #282828;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.your-music-no-image-icon {
+  font-size: 18px;
+  color: #ffffff;
+}
+.your-music-track-image-container {
+  width: 60px;
+  height: 60px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.your-music-track-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 2px;
+}
+.your-music-track-details {
+  margin-left: 10px;
+  max-height: 60px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.your-music-track-name {
+  font-family: 'Roboto';
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 2px;
+  max-width: 350px;
+  overflow: hidden;
+}
+.your-music-track-artist {
+  font-family: 'Roboto';
+  font-size: 12px;
+  margin-top: 1px;
+  max-width: 350px;
+}
+.your-music-track-duration {
+  font-family: 'Roboto';
+  font-size: 12px;
+  font-weight: 500;
+  width: 10%;
+}
+@media screen and (min-width: 768px) {
+  .your-music-track-image-container {
+    width: 60px;
+    height: 60px;
+  }
+  .your-music-track-image {
+    width: 60px;
+    height: 60px;
+  }
+  .your-music-track-name {
+    font-size: 16px;
+  }
+}
+
+.your-music-no-tracks {
+  width: 100%;
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.your-music-no-tracks-logo {
+  color: #ffffff;
+  font-size: 44px;
+}
+@media screen and (min-width: 768px) {
+  .your-music-no-tracks-logo {
+    font-size: 54px;
+  }
+}
+.your-music-add-tracks-button {
+  text-decoration: none;
+  font-family: 'Roboto';
+  font-size: 14px;
+  margin-top: 10px;
+  background-color: #181818;
+  color: #ffffff !important;
+  font-weight: bold;
+  padding: 20px 30px 20px 30px;
+  text-transform: uppercase;
+  border-radius: 6px;
+  display: inline-block;
+  transition: all 0.3s ease 0s;
+}
+.your-music-add-tracks-button:hover {
+  color: #181818 !important;
+  font-weight: bolder !important;
+  letter-spacing: 3px;
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+  -moz-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+  transition: all 0.3s ease 0s;
+}
+@media screen and (min-width: 768px) {
+  .your-music-add-tracks-button {
+    font-size: 16px;
+  }
+}
+
+.your-music-track-header-desktop {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+.your-music-track-no-image-desktop {
+  width: 60px;
+  height: 60px;
+  background-color: #282828;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.your-music-no-image-icon-desktop {
+  font-size: 18px;
+  color: #ffffff;
+}
+.your-music-track-image-container-desktop {
+  width: 60px;
+  height: 60px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.your-music-track-image-desktop {
+  width: 60px;
+  height: 60px;
+  border-radius: 2px;
+}
+.your-music-track-details-desktop {
+  margin-left: 10px;
+  max-height: 60px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.your-music-track-name-desktop {
+  font-family: 'Roboto';
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 2px;
+  max-width: 350px;
+}
+.your-music-track-artist-desktop {
+  font-family: 'Roboto';
+  font-size: 12px;
+  margin-top: 1px;
+  max-width: 350px;
+}
+.your-music-track-duration-desktop {
+  font-family: 'Roboto';
+  font-size: 12px;
+  font-weight: 500;
+  width: 10%;
+}
+
+.your-music-track-image-container-desktop {
+  width: 60px;
+  height: 60px;
+}
+.your-music-track-image-desktop {
+  width: 60px;
+  height: 60px;
+}
+.your-music-track-name-desktop {
+  font-size: 16px;
+}
+
+.your-music-no-tracks-desktop {
+  width: 100%;
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
