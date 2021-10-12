@@ -14,11 +14,13 @@ const apiStatusConst = {
   success: 'SUCCESS',
   failure: 'FAILURE',
 }
+let intervalId
 class SpecificPlaylist extends Component {
   state = {
     specificPlaylistApiStatus: apiStatusConst.loading,
     currentSelectedTrack: '',
     specificPlaylistData: {},
+    failureCount: 5,
   }
 
   componentDidMount() {
@@ -54,7 +56,31 @@ class SpecificPlaylist extends Component {
         specificPlaylistApiStatus: apiStatusConst.success,
         specificPlaylistData: fetchedData,
       })
+    } else {
+      this.setState(
+        {specificPlaylistApiStatus: apiStatusConst.failure},
+        this.runFailureCount,
+      )
     }
+  }
+
+  clearFailureInterval = () => {
+    const {failureCount} = this.state
+    if (failureCount === 0 || failureCount < 0) {
+      clearInterval(intervalId)
+      const {history} = this.props
+      Cookies.remove('pa_token')
+      history.replace('/login')
+    }
+  }
+
+  runFailureCount = () => {
+    intervalId = setInterval(() => {
+      this.setState(
+        preState => ({failureCount: preState.failureCount - 1}),
+        this.clearFailureInterval,
+      )
+    }, 1000)
   }
 
   getUserInfoApi = async () => {
@@ -120,41 +146,54 @@ class SpecificPlaylist extends Component {
       duration: eachTrack.track.duration_ms,
       artist: eachTrack.track.artists[0].name,
       added: eachTrack.added_at,
+      previewUrl: eachTrack.track.preview_url,
+      images: eachTrack.track.album.images,
     }
     return track
   }
 
-  renderTrackItem = (eachTrack, index) => {
-    const updatedEachTrack = this.getUpdatedEachTrack(eachTrack)
-    const {id, name, albumName, duration, artist, added} = updatedEachTrack
-    const durationInMins = this.getDurationInMins(duration)
-    const addedAt = this.getAddedAt(added)
-    const {currentSelectedTrack} = this.state
-    const trackStyle =
-      currentSelectedTrack === id ? 'specific-playlist-selected-track' : ''
-    return (
-      <li key={id} className={`specific-playlist-track ${trackStyle}`}>
-        <p className="specific-playlist-text text-color-1 specific-playlist-index-item">
-          {index}
-        </p>
-        <p className="specific-playlist-text text-color-1 specific-playlist-title-item">
-          {name}
-        </p>
-        <p className="specific-playlist-text text-color-1 specific-playlist-album-item">
-          {albumName}
-        </p>
-        <p className="specific-playlist-text text-color-1 specific-playlist-time-item">
-          {durationInMins}
-        </p>
-        <p className="specific-playlist-text text-color-1 specific-playlist-artist-item">
-          {artist}
-        </p>
-        <p className="specific-playlist-text text-color-1 specific-playlist-added-item">
-          {addedAt}
-        </p>
-      </li>
-    )
-  }
+  renderTrackItem = (eachTrack, index, items) => (
+    <PlayerContext.Consumer>
+      {value => {
+        const {onAddTrack} = value
+        const updatedEachTrack = this.getUpdatedEachTrack(eachTrack)
+        const onClickSong = () =>
+          onAddTrack({...updatedEachTrack, index}, items)
+        const {id, name, albumName, duration, artist, added} = updatedEachTrack
+        const durationInMins = this.getDurationInMins(duration)
+        const addedAt = this.getAddedAt(added)
+        const {currentSelectedTrack} = this.state
+        const trackStyle =
+          currentSelectedTrack === id ? 'specific-playlist-selected-track' : ''
+        return (
+          <li
+            key={id}
+            className={`specific-playlist-track ${trackStyle}`}
+            onClick={onClickSong}
+          >
+            <p className="specific-playlist-text text-color-1 specific-playlist-index-item">
+              {index}
+            </p>
+            <p className="specific-playlist-text text-color-1 specific-playlist-title-item">
+              {name}
+            </p>
+            <p className="specific-playlist-text text-color-1 specific-playlist-album-item">
+              {albumName}
+            </p>
+            <p className="specific-playlist-text text-color-1 specific-playlist-time-item">
+              {durationInMins}
+            </p>
+            <p className="specific-playlist-text text-color-1 specific-playlist-artist-item">
+              {artist}
+            </p>
+            <p className="specific-playlist-text text-color-1 specific-playlist-added-item">
+              {addedAt}
+            </p>
+          </li>
+        )
+      }}
+    </PlayerContext.Consumer>
+  )
 
   renderPlaylistDesktop = () => {
     let index = 0
@@ -167,6 +206,16 @@ class SpecificPlaylist extends Component {
       playlistCategory,
     } = specificPlaylistData
     const {total, items} = tracks
+    const previewUrlFilteredItems = items.filter(each => {
+      if (
+        each.track.preview_url === null ||
+        each.track.preview_url === undefined ||
+        each.track.preview_url === ''
+      ) {
+        return false
+      }
+      return true
+    })
     return (
       <>
         <Navbar currentSelected="HOME" />
@@ -217,9 +266,13 @@ class SpecificPlaylist extends Component {
           <hr className="specific-playlist-rule" />
 
           <ul className="specific-playlist-tracks-container">
-            {items.map(eachItem => {
+            {previewUrlFilteredItems.map(eachItem => {
               index += 1
-              return this.renderTrackItem(eachItem, index)
+              return this.renderTrackItem(
+                eachItem,
+                index,
+                previewUrlFilteredItems,
+              )
             })}
           </ul>
           <PlayerContext.Consumer>
@@ -230,33 +283,56 @@ class SpecificPlaylist extends Component {
     )
   }
 
-  renderTrackItemMobile = eachTrack => {
-    const updatedEachTrack = this.getUpdatedEachTrack(eachTrack)
-    const {id, name, duration, artist} = updatedEachTrack
-    const durationInMins = this.getDurationInMins(duration)
-    const {currentSelectedTrack} = this.state
-    const trackStyle =
-      currentSelectedTrack === id ? 'specific-playlist-selected-track' : ''
-    return (
-      <li key={id} className={`specific-playlist-track-mobile ${trackStyle}`}>
-        <div className="specific-playlist-track-details-mobile">
-          <p className="specific-playlist-track-name-mobile text-color-2">
-            {name}
-          </p>
-          <p className="specific-playlist-text-mobile text-color-5">{artist}</p>
-        </div>
-        <p className="specific-playlist-text-mobile text-color-5">
-          {durationInMins}
-        </p>
-      </li>
-    )
-  }
+  renderTrackItemMobile = (eachTrack, index, items) => (
+    <PlayerContext.Consumer>
+      {value => {
+        const {onAddTrack} = value
+        const updatedEachTrack = this.getUpdatedEachTrack(eachTrack)
+        const onClickSong = () =>
+          onAddTrack({...updatedEachTrack, index}, items)
+        const {id, name, duration, artist} = updatedEachTrack
+        const durationInMins = this.getDurationInMins(duration)
+        const {currentSelectedTrack} = this.state
+        const trackStyle =
+          currentSelectedTrack === id ? 'specific-playlist-selected-track' : ''
+        return (
+          <li
+            key={id}
+            className={`specific-playlist-track-mobile ${trackStyle}`}
+            onClick={onClickSong}
+          >
+            <div className="specific-playlist-track-details-mobile">
+              <p className="specific-playlist-track-name-mobile text-color-2">
+                {name}
+              </p>
+              <p className="specific-playlist-text-mobile text-color-5">
+                {artist}
+              </p>
+            </div>
+            <p className="specific-playlist-text-mobile text-color-5">
+              {durationInMins}
+            </p>
+          </li>
+        )
+      }}
+    </PlayerContext.Consumer>
+  )
 
   renderPlaylistMobile = () => {
+    let index = 0
     const {specificPlaylistData} = this.state
     const {imageUrl, name, tracks, playlistCategory} = specificPlaylistData
     const {total, items} = tracks
-
+    const previewUrlFilteredItems = items.filter(each => {
+      if (
+        each.track.preview_url === null ||
+        each.track.preview_url === undefined ||
+        each.track.preview_url === ''
+      ) {
+        return false
+      }
+      return true
+    })
     return (
       <div className="specific-playlist-main-mobile">
         <Link to="/" className="specific-playlist-back-btn-mobile">
@@ -282,7 +358,14 @@ class SpecificPlaylist extends Component {
           </p>
         </div>
         <ul className="specific-playlist-tracks-mobile">
-          {items.map(eachItem => this.renderTrackItemMobile(eachItem))}
+          {previewUrlFilteredItems.map(eachItem => {
+            index += 1
+            return this.renderTrackItemMobile(
+              eachItem,
+              index,
+              previewUrlFilteredItems,
+            )
+          })}
         </ul>
         <PlayerContext.Consumer>
           {value => <Player value={value} />}
@@ -299,6 +382,32 @@ class SpecificPlaylist extends Component {
     </div>
   )
 
+  renderFailure = () => {
+    const {failureCount} = this.state
+    return (
+      <PlayerContext.Consumer>
+        {value => {
+          const {audio} = value
+          audio.pause()
+          audio.currentTime = 0
+          return (
+            <div className="failure-container">
+              <img
+                src="https://res.cloudinary.com/maheshnaiducloudinary/image/upload/v1633941997/My%20Spotify%20Clone/My%20Spotify%20Logo/My_Spotify_Logo_s05z7j.png"
+                alt="Spotify"
+                className="login-website-logo-desktop-image"
+              />
+              <h1 className="failure-heading-1">Oops! Something went wrong</h1>
+              <p className="failure-heading-2">
+                Redirecting to login in {failureCount} seconds...
+              </p>
+            </div>
+          )
+        }}
+      </PlayerContext.Consumer>
+    )
+  }
+
   renderContent = () => {
     const {specificPlaylistApiStatus} = this.state
     switch (specificPlaylistApiStatus) {
@@ -306,6 +415,8 @@ class SpecificPlaylist extends Component {
         return <Loader />
       case apiStatusConst.success:
         return this.renderResponsivePlaylist()
+      case apiStatusConst.failure:
+        return this.renderFailure()
       default:
         return null
     }

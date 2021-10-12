@@ -126,6 +126,10 @@
 .profile-detail-count-color {
   color: #1db954;
 }
+.profile-detail-count-color:hover {
+  filter: brightness(800%);
+  filter: contrast(300%);
+}
 .profile-detail-text-color {
   color: #9b9b9b;
 }

@@ -15,5 +15,7 @@ const PlayerContext = React.createContext({
   onClickNext: () => {},
   onClickPrevious: () => {},
   onClickMute: () => {},
+  onToggleEnvironment: () => {},
+  audio: new Audio(''),
 })
 export default PlayerContext

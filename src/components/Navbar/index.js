@@ -28,7 +28,7 @@ class Navbar extends Component {
       <nav className="navbar-desktop">
         <Link to="/" className="link-item">
           <img
-            src="/img/logo.png"
+            src="https://res.cloudinary.com/maheshnaiducloudinary/image/upload/v1633941997/My%20Spotify%20Clone/My%20Spotify%20Logo/My_Spotify_Logo_s05z7j.png"
             alt="website logo"
             className="navbar-desktop-logo"
           />
@@ -90,7 +90,7 @@ class Navbar extends Component {
     <div className="navbar-mobile-no-menu">
       <Link to="/" className="link-item-mobile">
         <img
-          src="/img/logo.png"
+          src="https://res.cloudinary.com/maheshnaiducloudinary/image/upload/v1633941997/My%20Spotify%20Clone/My%20Spotify%20Logo/My_Spotify_Logo_s05z7j.png"
           className="navbar-mobile-logo"
           alt="navbar logo"
         />

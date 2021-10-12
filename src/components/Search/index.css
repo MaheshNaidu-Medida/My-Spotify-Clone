@@ -120,6 +120,7 @@
   list-style-type: none;
   padding: 0 0 0px 27px;
   margin-top: 0;
+  margin-bottom: 50px;
   width: 100%;
   display: flex;
   align-items: center;
@@ -128,6 +129,7 @@
 @media screen and (min-width: 768px) {
   .search-default-list-container {
     padding: 0px 0px 0px 32px;
+    margin-bottom: 25px;
   }
 }
 .each-item-link {
@@ -262,6 +264,7 @@
 }
 .search-result-playlist-no-list {
   width: 100%;
+  margin-bottom: 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -406,6 +409,11 @@
   display: flex;
   align-items: flex-start;
   flex-wrap: wrap;
+}
+@media screen and (max-width: 768px) {
+  .search-result-playlists {
+    margin-bottom: 40px;
+  }
 }
 .search-result-playlist-item {
   list-style-type: none;

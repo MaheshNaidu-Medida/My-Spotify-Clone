@@ -19,42 +19,75 @@ import PlayerContext from './context/PlayerContext'
 import MyFullSongs from './MyFullSongs/MyFullSongs'
 import './App.css'
 
-const initialSongsList = MyFullSongs
-const initialSong =
-  initialSongsList[Math.floor(Math.random() * initialSongsList.length)]
+const MySongsList = MyFullSongs
 
-let audio = new Audio(initialSongsList[0].previewUrl)
-audio.load()
+let audio
 class App extends Component {
   state = {
     initialState: true,
-    currentSongData: initialSong,
-    currentSongsList: initialSongsList,
+    currentSongData: {},
+    currentSongsList: [],
+    previousSongsList: [],
+    previousSongData: {},
     isLoading: false,
     isPlaying: false,
     isMuted: false,
-    currentDuration: '',
-    currentVolume: '',
+    currentDuration: 0,
+    currentVolume: 1,
+  }
+
+  componentDidMount() {
+    const initialSong =
+      MySongsList[Math.floor(Math.random() * MySongsList.length)]
+    this.setState(
+      {
+        currentSongsList: MySongsList,
+        currentSongData: initialSong,
+        previousSongsList: MySongsList,
+        previousSongData: initialSong,
+        isPlaying: false,
+      },
+      this.onAddTrackToAudio,
+    )
+  }
+
+  componentWillUnmount() {
+    audio.removeEventListener('timeupdate', this.updateCurrentTime)
+    audio.removeEventListener('volumechange', this.updateVolumeChange)
+    audio.removeEventListener('ended', this.updateEnded)
+    audio.removeEventListener('mute', this.updateMute)
+    audio.pause()
+    audio.currentTime = 0
+    audio.src = ''
+  }
+
+  updateCurrentTime = event => {
+    this.setState({currentDuration: event.target.currentTime})
+  }
+
+  updateVolumeChange = event => {
+    this.setState({currentVolume: event.target.volume})
+  }
+
+  updateEnded = () => {
+    this.setState({isPlaying: false}, this.onClickNext)
+  }
+
+  updateMute = () => {
+    this.setState({isMuted: true}, this.onClickAudioMute)
   }
 
   onAddTrackToAudio = () => {
-    const {currentSongData, isPlaying} = this.state
+    const {currentSongData, isPlaying, currentVolume} = this.state
     const {previewUrl} = currentSongData
     audio = new Audio(previewUrl)
+    audio.volume = currentVolume
+    audio.currentTime = 0
 
-    audio.addEventListener('timeupdate', event => {
-      this.setState({currentDuration: event.target.currentTime})
-    })
-    audio.addEventListener('volumechange', event => {
-      this.setState({currentVolume: event.target.volume})
-    })
-
-    audio.addEventListener('ended', () => {
-      this.setState({isPlaying: false}, this.onClickNext)
-    })
-    audio.addEventListener('mute', () => {
-      this.setState({isMuted: true}, this.onClickAudioMute)
-    })
+    audio.addEventListener('timeupdate', this.updateCurrentTime)
+    audio.addEventListener('volumechange', this.updateVolumeChange)
+    audio.addEventListener('ended', this.updateEnded)
+    audio.addEventListener('mute', this.updateMute)
 
     audio.load()
     if (isPlaying) {
@@ -87,19 +120,10 @@ class App extends Component {
     const {isPlaying, initialState} = this.state
     if (initialState) {
       if (isPlaying) {
-        audio.addEventListener('timeupdate', event => {
-          this.setState({currentDuration: event.target.currentTime})
-        })
-        audio.addEventListener('volumechange', event => {
-          this.setState({currentVolume: event.target.volume})
-        })
-
-        audio.addEventListener('ended', () => {
-          this.setState({isPlaying: false}, this.onClickNext)
-        })
-        audio.addEventListener('mute', () => {
-          this.setState({isMuted: true}, this.onClickAudioMute)
-        })
+        audio.addEventListener('timeupdate', this.updateCurrentTime)
+        audio.addEventListener('volumechange', this.updateVolumeChange)
+        audio.addEventListener('ended', this.updateEnded)
+        audio.addEventListener('mute', this.updateMute)
 
         audio.play()
       } else {
@@ -122,12 +146,12 @@ class App extends Component {
   }
 
   onChangeAudioDuration = () => {
-    const {currentTime} = this.state
-    audio.currentTime = currentTime
+    const {currentDuration} = this.state
+    audio.currentTime = currentDuration
   }
 
   onChangeDuration = value => {
-    this.setState({currentTime: value}, this.onChangeAudioDuration)
+    this.setState({currentDuration: value}, this.onChangeAudioDuration)
   }
 
   onChangeAudioVolume = () => {
@@ -136,7 +160,7 @@ class App extends Component {
   }
 
   onChangeVolume = value => {
-    this.setState({currentVolume: value})
+    this.setState({currentVolume: value}, this.onChangeAudioVolume)
   }
 
   onClickNext = () => {
@@ -152,6 +176,7 @@ class App extends Component {
     const currentSongIndex = currentSongData.index
     if (currentSongIndex === currentSongsList.length) {
       const data = currentSongsList[0]
+
       let nextSongData
       if (initialState) {
         nextSongData = data
@@ -172,7 +197,6 @@ class App extends Component {
       )
     } else {
       const data = currentSongsList[currentSongIndex]
-
       let nextSongData
 
       if (initialState) {
@@ -234,14 +258,19 @@ class App extends Component {
         this.onAddTrackToAudio,
       )
     } else {
-      const data = currentSongsList[currentSongIndex - 1]
-      const previousSongData = {
-        name: data.track.name,
-        duration: data.track.duration_ms,
-        artist: data.track.artists[0].name,
-        previewUrl: data.track.preview_url,
-        images: data.track.album.images,
-        index: currentSongIndex - 1,
+      const data = currentSongsList[currentSongIndex - 2]
+      let previousSongData
+      if (initialState) {
+        previousSongData = data
+      } else {
+        previousSongData = {
+          name: data.track.name,
+          duration: data.track.duration_ms,
+          artist: data.track.artists[0].name,
+          previewUrl: data.track.preview_url,
+          images: data.track.album.images,
+          index: currentSongIndex - 1,
+        }
       }
       this.setState(
         {
@@ -255,11 +284,13 @@ class App extends Component {
   }
 
   onClickAudioMute = () => {
+    audio.volume = 0
     audio.muted = true
   }
 
   onClickAudioUnmute = () => {
     audio.muted = false
+    audio.volume = 0.5
   }
 
   onClickMute = () => {
@@ -272,6 +303,39 @@ class App extends Component {
       } else {
         this.setState({isMuted: true}, this.onClickAudioMute)
       }
+    }
+  }
+
+  onToggleEnvironment = () => {
+    audio.pause()
+    const {initialState} = this.state
+    if (initialState === false) {
+      const {currentSongsList, currentSongData} = this.state
+      const randomInitial =
+        MySongsList[Math.floor(Math.random() * MySongsList.length)]
+      this.setState(
+        {
+          currentSongsList: MySongsList,
+          currentSongData: randomInitial,
+          previousSongsList: currentSongsList,
+          previousSongData: currentSongData,
+          initialState: true,
+          isPlaying: false,
+          currentDuration: audio.currentTime,
+        },
+        this.onAddTrackToAudio,
+      )
+    } else {
+      const {previousSongsList, previousSongData} = this.state
+      this.setState(
+        {
+          currentSongsList: previousSongsList,
+          currentSongData: previousSongData,
+          initialState: false,
+          isPlaying: false,
+        },
+        this.onAddTrackToAudio,
+      )
     }
   }
 
@@ -298,6 +362,7 @@ class App extends Component {
             isLoading,
             isPlaying,
             isMuted,
+            audio,
             onClickMute: this.onClickMute,
             onAddTrack: this.onAddTrack,
             onTogglePlay: this.onTogglePlay,
@@ -305,11 +370,12 @@ class App extends Component {
             onChangeVolume: this.onChangeVolume,
             onClickNext: this.onClickNext,
             onClickPrevious: this.onClickPrevious,
+            onToggleEnvironment: this.onToggleEnvironment,
           }}
         >
           <BrowserRouter>
             <Switch>
-              <Route exact path="/login" component={LoginForm} />
+              <Route exact path="/login" component={LoginForm} audio={audio} />
               <ProtectedRoute exact path="/profile" component={Profile} />
               <ProtectedRoute exact path="/" component={SpotifyClone} />
               <ProtectedRoute
@@ -343,7 +409,7 @@ class App extends Component {
                 component={YourSelectedPlaylist}
               />
               <ProtectedRoute exact path="/your-music" component={YourMusic} />
-              <ProtectedRoute exact path="/search" component={Search} />
+              <ProtectedRoute exact path="/search" component={Search} audio />
               <ProtectedRoute
                 exact
                 path="/search/searched-playlist/:id"

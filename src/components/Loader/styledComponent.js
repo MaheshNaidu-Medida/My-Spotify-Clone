@@ -24,7 +24,7 @@ export const LoadingText = styled.h1`
   font-family: 'Roboto';
   font-size: 22px;
   text-align: center;
-
+  margin-left: 10px;
   @media screen and (min-width: 768px) {
     font-size: 28px;
   }

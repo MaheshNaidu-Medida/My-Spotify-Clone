@@ -101,6 +101,7 @@
   margin-top: 0;
   margin-bottom: 5px;
 }
+
 .specific-playlist-track-header {
   width: 100%;
   padding-left: 32px;
@@ -229,7 +230,7 @@
 .specific-playlist-tracks-mobile {
   list-style-type: none;
   margin: 0;
-  margin-bottom: 55px;
+  margin-bottom: 80px;
   padding-left: 0;
   width: 100%;
   display: flex;

@@ -1,11 +1,10 @@
-import moment from 'moment'
 import {
   AiFillPlayCircle,
   AiFillPauseCircle,
   AiFillStepBackward,
   AiFillStepForward,
 } from 'react-icons/ai'
-import {BsPauseFill, BsPlayFill} from 'react-icons/bs'
+import {BsPauseFill, BsPlayFill, BsToggleOff, BsToggleOn} from 'react-icons/bs'
 import {HiVolumeUp} from 'react-icons/hi'
 import {SiApplemusic} from 'react-icons/si'
 import {BiSkipPrevious} from 'react-icons/bi'
@@ -31,9 +30,9 @@ const Player = () => (
         onChangeDuration,
         onChangeVolume,
         onClickMute,
+        onToggleEnvironment,
       } = value
       const {name, artist, images, duration} = currentSongData
-
       const onClickPlayPause = () => {
         onTogglePlay()
       }
@@ -55,6 +54,8 @@ const Player = () => (
 
       const onClickMuteButton = () => onClickMute()
 
+      const onClickStateToggle = () => onToggleEnvironment()
+
       const getDurationInMins = time => {
         const durationInSec = Math.floor(time % 60)
         const durationInMin = Math.floor(time / 60)
@@ -68,7 +69,10 @@ const Player = () => (
       return (
         <div className="player">
           <div className="player-details">
-            {images === undefined || images === null || images.length === 0 ? (
+            {images === undefined ||
+            images === null ||
+            images.length === 0 ||
+            images[0].url === '' ? (
               <div className="player-preview-no-image">
                 <SiApplemusic className="player-no-image-icon" />
               </div>
@@ -82,7 +86,7 @@ const Player = () => (
               </div>
             )}
             <div className="player-title-details">
-              <p className="player-track-name">
+              <p p className="player-track-name">
                 {name === '' || name === undefined || name === null
                   ? 'Song'
                   : name}
@@ -118,6 +122,18 @@ const Player = () => (
                 className="play-pause-icon-large"
                 onClick={onClickNextSong}
               />
+
+              {initialState ? (
+                <BsToggleOn
+                  className="player-state-toggle-on"
+                  onClick={onClickStateToggle}
+                />
+              ) : (
+                <BsToggleOff
+                  className="player-state-toggle-off"
+                  onClick={onClickStateToggle}
+                />
+              )}
               <p className="player-duration-details">
                 {getDurationInMins(currentDuration)}/
               </p>
@@ -156,21 +172,22 @@ const Player = () => (
               )}
               <input
                 type="range"
-                min="0"
-                max="1"
-                step="0.1"
+                min="0.0"
+                max="1.0"
+                step="0.001"
                 value={
                   currentVolume === undefined ||
                   currentVolume === null ||
                   currentVolume === ''
-                    ? '0'
-                    : currentVolume / 10
+                    ? '0.5'
+                    : currentVolume
                 }
                 onChange={onChangeSongVolume}
                 className="player-volume-slider"
               />
             </div>
           </div>
+
           <div className="player-small-devices">
             <AiFillStepBackward
               className="play-pause-icon-small"
@@ -191,7 +208,33 @@ const Player = () => (
               className="play-pause-icon-small"
               onClick={onClickNextSong}
             />
+            {initialState ? (
+              <BsToggleOn
+                className="player-state-toggle-on"
+                onClick={onClickStateToggle}
+              />
+            ) : (
+              <BsToggleOff
+                className="player-state-toggle-off"
+                onClick={onClickStateToggle}
+              />
+            )}
           </div>
+          <input
+            type="range"
+            min="0"
+            max={initialState ? duration : '30'}
+            step="0.01"
+            value={
+              currentDuration === undefined ||
+              currentDuration === null ||
+              currentDuration === ''
+                ? '0'
+                : currentDuration
+            }
+            onChange={onChangeSongDuration}
+            className="player-slider-small"
+          />
         </div>
       )
     }}

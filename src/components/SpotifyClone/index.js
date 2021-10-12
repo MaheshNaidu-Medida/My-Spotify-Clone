@@ -2,7 +2,6 @@ import {Component} from 'react'
 import {Link} from 'react-router-dom'
 import Cookies from 'js-cookie'
 import moment from 'moment'
-
 import Navbar from '../Navbar'
 import Loader from '../Loader'
 import Player from '../Player'
@@ -14,11 +13,36 @@ const apiStatusConst = {
   success: 'SUCCESS',
   failure: 'FAILURE',
 }
+const colorsArray = [
+  '#fc08d8',
+  '#5207f2',
+  '#EC6D45',
+  '#E39C40',
+  '#44B844',
+  '#4B5B63',
+  '#D8383B',
+  '#7F5FFF',
+  '#3965C5',
+  '#9EB8C6',
+  '#3AADC9',
+  '#8ABF3D',
+  '#4840CA',
+  '#006369',
+  '#D28935',
+  '#8635CF',
+  '#34C598',
+  '#C73555',
+  '#AC3EBA',
+  '#279653',
+]
+
+let intervalId
 
 class SpotifyClone extends Component {
   state = {
     homeApiStatus: apiStatusConst.loading,
     fetchedData: {},
+    failureCount: 5,
   }
 
   componentDidMount() {
@@ -34,15 +58,48 @@ class SpotifyClone extends Component {
     const playlistsData = await this.getPlaylistsApi()
     const categoryPlaylistsData = await this.getCategoryPlaylistsApi()
     const albumsData = await this.getAlbumsApi()
-    const fetchedData = {
-      playlistsData,
-      categoryPlaylistsData,
-      albumsData,
+    if (
+      playlistsData === null ||
+      categoryPlaylistsData === null ||
+      albumsData === null
+    ) {
+      this.setState(
+        {homeApiStatus: apiStatusConst.failure},
+        this.runFailureCount,
+      )
+    } else {
+      const fetchedData = {
+        playlistsData,
+        categoryPlaylistsData,
+        albumsData,
+      }
+      this.setState({
+        homeApiStatus: apiStatusConst.success,
+        fetchedData,
+      })
     }
-    this.setState({
-      homeApiStatus: apiStatusConst.success,
-      fetchedData,
-    })
+  }
+
+  clearFailureInterval = () => {
+    const {failureCount} = this.state
+    if (failureCount === 0 || failureCount < 0) {
+      clearInterval(intervalId)
+      const {history} = this.props
+      Cookies.remove('pa_token')
+      history.replace('/login')
+    }
+  }
+
+  runFailureCount = () => {
+    const {audio} = this.props
+    audio.pause()
+    audio.currentTime = 0
+    intervalId = setInterval(() => {
+      this.setState(
+        preState => ({failureCount: preState.failureCount - 1}),
+        this.clearFailureInterval,
+      )
+    }, 1000)
   }
 
   getUserInfoApi = async () => {
@@ -136,6 +193,9 @@ class SpotifyClone extends Component {
   renderAlbumItem = eachItem => {
     const {id, images, name} = eachItem
     const imageUrl = images[1].url
+    if (id === null || id === undefined || id === '') {
+      return null
+    }
     return (
       <Link to={`/specific-album/${id}`} className="each-item-link">
         <li className="home-list-item-3" key={id}>
@@ -161,36 +221,20 @@ class SpotifyClone extends Component {
     )
   }
 
-  getRandomColor = () => {
-    const colorsArray = [
-      '#EC6D45',
-      '#E39C40',
-      '#44B844',
-      '#4B5B63',
-      '#D8383B',
-      '#7F5FFF',
-      '#3965C5',
-      '#9EB8C6',
-      '#3AADC9',
-      '#8ABF3D',
-      '#4840CA',
-      '#006369',
-      '#D28935',
-      '#8635CF',
-      '#34C598',
-      '#C73555',
-      '#AC3EBA',
-      '#279653',
-    ]
+  /* getRandomColor = () => { 
     const index = Math.floor(Math.random() * colorsArray.length)
     const color = colorsArray[index]
     return color
-  }
+  } */
 
-  renderCategoryPlaylistsItem = eachItem => {
+  renderCategoryPlaylistsItem = (eachItem, colorIndex) => {
     const {id, name, icons} = eachItem
     const imageUrl = icons[0].url
-    const bgColor = this.getRandomColor()
+
+    const bgColor = colorsArray[colorIndex]
+    if (id === null || id === undefined || id === '') {
+      return null
+    }
     return (
       <Link
         to={`/category-playlists/category/${id}`}
@@ -214,13 +258,15 @@ class SpotifyClone extends Component {
   renderCategoryPlaylists = () => {
     const {fetchedData} = this.state
     const {categoryPlaylistsData} = fetchedData
+    let colorIndex = -1
     return (
       <>
         <h1 className="home-heading">Genres & Moods</h1>
         <ul className="home-list-container">
-          {categoryPlaylistsData.map(eachItem =>
-            this.renderCategoryPlaylistsItem(eachItem),
-          )}
+          {categoryPlaylistsData.map(eachItem => {
+            colorIndex += 1
+            return this.renderCategoryPlaylistsItem(eachItem, colorIndex)
+          })}
         </ul>
       </>
     )
@@ -228,8 +274,11 @@ class SpotifyClone extends Component {
 
   renderPlaylistsItem = eachItem => {
     const {images, name, id} = eachItem
-    const imageUrl = images[0].url
 
+    const imageUrl = images[0].url
+    if (id === null || id === undefined || id === '') {
+      return null
+    }
     return (
       <Link to={`/special-playlist/${id}`} className="each-item-link">
         <li className="home-list-item-1" key={id}>
@@ -268,6 +317,32 @@ class SpotifyClone extends Component {
     </div>
   )
 
+  renderFailure = () => {
+    const {failureCount} = this.state
+    return (
+      <PlayerContext.Consumer>
+        {value => {
+          const {audio} = value
+          audio.pause()
+          audio.currentTime = 0
+          return (
+            <div className="failure-container">
+              <img
+                src="https://res.cloudinary.com/maheshnaiducloudinary/image/upload/v1633941997/My%20Spotify%20Clone/My%20Spotify%20Logo/My_Spotify_Logo_s05z7j.png"
+                alt="Spotify"
+                className="login-website-logo-desktop-image"
+              />
+              <h1 className="failure-heading-1">Oops! Something went wrong</h1>
+              <p className="failure-heading-2">
+                Redirecting to login in {failureCount} seconds...
+              </p>
+            </div>
+          )
+        }}
+      </PlayerContext.Consumer>
+    )
+  }
+
   renderUI = () => {
     const {homeApiStatus} = this.state
 
@@ -276,6 +351,8 @@ class SpotifyClone extends Component {
         return this.renderItems()
       case apiStatusConst.loading:
         return this.renderLoader()
+      case apiStatusConst.failure:
+        return this.renderFailure()
       default:
         return null
     }

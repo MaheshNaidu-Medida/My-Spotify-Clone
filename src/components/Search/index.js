@@ -18,6 +18,29 @@ const apiStatusConst = {
   failure: 'API_FAILURE',
 }
 
+const colorsArray = [
+  '#EC6D45',
+  '#E39C40',
+  '#44B844',
+  '#4B5B63',
+  '#D8383B',
+  '#7F5FFF',
+  '#3965C5',
+  '#9EB8C6',
+  '#3AADC9',
+  '#8ABF3D',
+  '#4840CA',
+  '#006369',
+  '#D28935',
+  '#8635CF',
+  '#34C598',
+  '#C73555',
+  '#AC3EBA',
+  '#279653',
+  '#fc08d8',
+  '#5207f2',
+]
+let intervalId
 class Search extends Component {
   state = {
     searchApiStatus: apiStatusConst.loading,
@@ -26,6 +49,7 @@ class Search extends Component {
     fetchedSearchData: {},
     isSeeAllEnabled: false,
     isPlaylistSeeAllEnabled: false,
+    failureCount: 5,
   }
 
   componentDidMount() {
@@ -57,8 +81,35 @@ class Search extends Component {
             playlistItems: data.playlists.items,
           },
         })
+      } else {
+        this.setState(
+          {searchApiStatus: apiStatusConst.failure},
+          this.runFailureCount,
+        )
       }
     }
+  }
+
+  clearFailureInterval = () => {
+    const {failureCount} = this.state
+    if (failureCount === 0 || failureCount < 0) {
+      clearInterval(intervalId)
+      const {history} = this.props
+      Cookies.remove('pa_token')
+      history.replace('/login')
+    }
+  }
+
+  runFailureCount = () => {
+    const {audio} = this.props
+    audio.pause()
+    audio.currentTime = 0
+    intervalId = setInterval(() => {
+      this.setState(
+        preState => ({failureCount: preState.failureCount - 1}),
+        this.clearFailureInterval,
+      )
+    }, 1000)
   }
 
   getDefaultSearchApi = async () => {
@@ -80,6 +131,11 @@ class Search extends Component {
         searchApiStatus: apiStatusConst.success,
         initialData: categoryPlaylistsData,
       })
+    } else {
+      this.setState(
+        {searchApiStatus: apiStatusConst.failure},
+        this.runFailureCount,
+      )
     }
   }
 
@@ -122,6 +178,20 @@ class Search extends Component {
     return `${durationInMin}:${durationInSec}`
   }
 
+  getUpdatedEachTrack = eachTrack => {
+    const track = {
+      id: eachTrack.id,
+      trackNumber: eachTrack.track_number,
+      name: eachTrack.name,
+      albumName: eachTrack.album.name,
+      duration: eachTrack.duration_ms,
+      artist: eachTrack.artists[0].name,
+      previewUrl: eachTrack.preview_url,
+      images: eachTrack.album.images,
+    }
+    return track
+  }
+
   renderTotalTracks = total => {
     let detail = ''
     if (total === 0) {
@@ -137,6 +207,9 @@ class Search extends Component {
   renderPlaylistItem = eachItem => {
     const {id, images, name, tracks} = eachItem
     const imageUrl = images.length === 0 ? '' : images[0].url
+    if (id === null || id === undefined || id === '') {
+      return null
+    }
     return (
       <Link to={`/search/searched-playlist/${id}`} className="each-item-link">
         <li key={id} className="search-result-playlist-item">
@@ -170,8 +243,19 @@ class Search extends Component {
     </div>
   )
 
-  renderYourMusicTrack = eachItem => {
-    const {album, artists, id} = eachItem
+  renderYourMusicTrack = (eachItem, index, items) => (
+    <PlayerContext.Consumer>
+      {value => {
+        const {onAddTrack} = value
+        const updatedEachTrack = this.getUpdatedEachTrack(eachItem)
+        const onClickSong = () =>
+          onAddTrack({...updatedEachTrack, index}, items)
+
+        const {images, artist, id, name} = updatedEachTrack
+        const duration = this.getDurationInMins(eachItem.duration_ms)
+        const imageUrl = images[0].url
+
+        /*  const {album, artists, id} = eachItem
     const {name} = eachItem
     const previewUrl = eachItem.preview_url
     const duration = this.getDurationInMins(eachItem.duration_ms)
@@ -181,46 +265,65 @@ class Search extends Component {
     const artist =
       artists.length > 1
         ? `${artists[0].name} • ${artists[1].name}`
-        : artists[0].name
+        : artists[0].name */
 
-    return (
-      <li key={id} className="search-result-music-track">
-        <div>
-          <div className="search-result-music-track-header">
-            {imageUrl === '' ? (
-              <div className="search-result-music-track-no-image">
-                <IoMusicalNotes className="search-result-music-no-image-icon" />
+        return (
+          <li
+            key={id}
+            className="search-result-music-track"
+            onClick={onClickSong}
+          >
+            <div>
+              <div className="search-result-music-track-header">
+                {imageUrl === '' ? (
+                  <div className="search-result-music-track-no-image">
+                    <IoMusicalNotes className="search-result-music-no-image-icon" />
+                  </div>
+                ) : (
+                  <div className="search-result-music-track-image-container">
+                    <img
+                      src={imageUrl}
+                      alt={name}
+                      className="search-result-music-track-image"
+                    />
+                  </div>
+                )}
+                <div className="search-result-music-track-details">
+                  <p className="search-result-music-track-name">{name}</p>
+                  <p className="search-result-music-track-artist text-color-5">
+                    {artist}
+                  </p>
+                </div>
               </div>
-            ) : (
-              <div className="search-result-music-track-image-container">
-                <img
-                  src={imageUrl}
-                  alt={name}
-                  className="search-result-music-track-image"
-                />
-              </div>
-            )}
-            <div className="search-result-music-track-details">
-              <p className="search-result-music-track-name">{name}</p>
-              <p className="search-result-music-track-artist text-color-5">
-                {artist}
-              </p>
             </div>
-          </div>
-        </div>
-        <p className="search-result-music-track-duration text-color-5">
-          {duration}
-        </p>
-      </li>
-    )
-  }
+            <p className="search-result-music-track-duration text-color-5">
+              {duration}
+            </p>
+          </li>
+        )
+      }}
+    </PlayerContext.Consumer>
+  )
 
   renderSeeAllTracks = trackItems => {
+    let index = 0
     const items = []
     items.push(trackItems[0])
     items.push(trackItems[1])
     items.push(trackItems[2])
     const {isSeeAllEnabled} = this.state
+
+    const modifiedTracksData = trackItems.map(each => ({
+      track: {
+        name: each.name,
+        duration_ms: each.duration_ms,
+        artists: each.artists,
+        preview_url: each.preview_url,
+        album: {
+          images: each.album.images,
+        },
+      },
+    }))
 
     return (
       <>
@@ -236,13 +339,27 @@ class Search extends Component {
               </button>
             </div>
             <ul className="search-result-music-tracks">
-              {items.map(eachItem => this.renderYourMusicTrack(eachItem))}
+              {items.map(eachItem => {
+                index += 1
+                return this.renderYourMusicTrack(
+                  eachItem,
+                  index,
+                  modifiedTracksData,
+                )
+              })}
             </ul>
           </>
         ) : (
           <>
             <ul className="search-result-music-tracks">
-              {trackItems.map(eachItem => this.renderYourMusicTrack(eachItem))}
+              {trackItems.map(eachItem => {
+                index += 1
+                return this.renderYourMusicTrack(
+                  eachItem,
+                  index,
+                  modifiedTracksData,
+                )
+              })}
             </ul>
             <div className="see-less-container">
               <button
@@ -259,17 +376,38 @@ class Search extends Component {
     )
   }
 
-  renderTracks = trackItems => (
-    <>
-      {trackItems.length <= 3 ? (
-        <ul className="search-result-music-tracks">
-          {trackItems.map(eachItem => this.renderYourMusicTrack(eachItem))}
-        </ul>
-      ) : (
-        this.renderSeeAllTracks(trackItems)
-      )}
-    </>
-  )
+  renderTracks = trackItems => {
+    let index = 0
+    const modifiedTracksData = trackItems.map(each => ({
+      track: {
+        name: each.name,
+        duration_ms: each.duration_ms,
+        artists: each.artists,
+        preview_url: each.preview_url,
+        album: {
+          images: each.album.images,
+        },
+      },
+    }))
+    return (
+      <>
+        {trackItems.length <= 3 ? (
+          <ul className="search-result-music-tracks">
+            {trackItems.map(eachItem => {
+              index += 1
+              return this.renderYourMusicTrack(
+                eachItem,
+                index,
+                modifiedTracksData,
+              )
+            })}
+          </ul>
+        ) : (
+          this.renderSeeAllTracks(trackItems)
+        )}
+      </>
+    )
+  }
 
   renderSeeAllPlaylists = playlistItems => {
     const items = []
@@ -332,14 +470,25 @@ class Search extends Component {
     const {fetchedSearchData} = this.state
     const {trackItems, playlistItems} = fetchedSearchData
 
+    const previewUrlFilteredItems = trackItems.filter(each => {
+      if (
+        each.preview_url === null ||
+        each.preview_url === undefined ||
+        each.preview_url === ''
+      ) {
+        return false
+      }
+      return true
+    })
+
     return (
       <>
         <div className="search-result-songs-main">
           <h1 className="search-result-music-heading">Songs</h1>
 
-          {trackItems.length === 0
+          {previewUrlFilteredItems.length === 0
             ? this.renderNoTracks()
-            : this.renderTracks(trackItems)}
+            : this.renderTracks(previewUrlFilteredItems)}
         </div>
         <div className="search-result-playlist-main">
           <h1 className="search-result-playlist-heading">Playlists</h1>
@@ -351,36 +500,21 @@ class Search extends Component {
     )
   }
 
-  getRandomColor = () => {
-    const colorsArray = [
-      '#EC6D45',
-      '#E39C40',
-      '#44B844',
-      '#4B5B63',
-      '#D8383B',
-      '#7F5FFF',
-      '#3965C5',
-      '#9EB8C6',
-      '#3AADC9',
-      '#8ABF3D',
-      '#4840CA',
-      '#006369',
-      '#D28935',
-      '#8635CF',
-      '#34C598',
-      '#C73555',
-      '#AC3EBA',
-      '#279653',
-    ]
+  /* getRandomColor = () => {
+    
     const index = Math.floor(Math.random() * colorsArray.length)
     const color = colorsArray[index]
     return color
-  }
+  } */
 
-  renderSearchDefaultItem = eachItem => {
+  renderSearchDefaultItem = (eachItem, colorIndex) => {
     const {id, name, icons} = eachItem
     const imageUrl = icons[0].url
-    const bgColor = this.getRandomColor()
+    // const bgColor = this.getRandomColor()
+    const bgColor = colorsArray[colorIndex]
+    if (id === null || id === undefined || id === '') {
+      return null
+    }
     return (
       <Link to={`/search/default-category/${id}`} className="each-item-link">
         <li key={id} className="search-list-item">
@@ -398,11 +532,15 @@ class Search extends Component {
 
   renderDefaultSearch = () => {
     const {initialData} = this.state
+    let colorIndex = -1
     return (
       <>
         <h1 className="search-default-heading">Explore Our Categories</h1>
         <ul className="search-default-list-container">
-          {initialData.map(eachItem => this.renderSearchDefaultItem(eachItem))}
+          {initialData.map(eachItem => {
+            colorIndex += 1
+            return this.renderSearchDefaultItem(eachItem, colorIndex)
+          })}
         </ul>
       </>
     )
@@ -417,6 +555,32 @@ class Search extends Component {
     return this.renderSearchContent()
   }
 
+  renderFailure = () => {
+    const {failureCount} = this.state
+    return (
+      <PlayerContext.Consumer>
+        {value => {
+          const {audio} = value
+          audio.pause()
+          audio.currentTime = 0
+          return (
+            <div className="failure-container">
+              <img
+                src="https://res.cloudinary.com/maheshnaiducloudinary/image/upload/v1633941997/My%20Spotify%20Clone/My%20Spotify%20Logo/My_Spotify_Logo_s05z7j.png"
+                alt="Spotify"
+                className="login-website-logo-desktop-image"
+              />
+              <h1 className="failure-heading-1">Oops! Something went wrong</h1>
+              <p className="failure-heading-2">
+                Redirecting to login in {failureCount} seconds...
+              </p>
+            </div>
+          )
+        }}
+      </PlayerContext.Consumer>
+    )
+  }
+
   renderUI = () => {
     const {searchApiStatus} = this.state
     switch (searchApiStatus) {
@@ -424,6 +588,8 @@ class Search extends Component {
         return <Loader />
       case apiStatusConst.success:
         return this.renderContent()
+      case apiStatusConst.failure:
+        return this.renderFailure()
       default:
         return null
     }

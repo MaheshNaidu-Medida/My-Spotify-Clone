@@ -157,6 +157,23 @@
   align-items: center;
   justify-content: space-between;
 }
+.specific-album-no-tracks-view {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.specific-album-no-tracks-heading {
+  color: #ffffff;
+  font-family: 'Roboto';
+  font-size: 22px;
+  font-weight: 500;
+}
+@media screen and (max-width: 768px) {
+  .specific-album-no-tracks-heading {
+    font-size: 16px;
+  }
+}
 .specific-album-tracks-container {
   list-style-type: none;
   padding: 0;
@@ -193,15 +210,14 @@
   width: 2%;
 }
 .specific-album-track-item {
-  width: 30%;
+  width: 45%;
 }
 .specific-album-time-item {
-  width: 30%;
+  width: 25%;
 }
 .specific-album-popularity-item {
-  width: 30%;
+  width: 32%;
 }
-
 .no-tracks-view {
   width: 100%;
   min-height: 20vh;
@@ -272,6 +288,7 @@
 .specific-album-tracks-mobile {
   list-style-type: none;
   margin: 0;
+  margin-bottom: 30px;
   padding-left: 0;
   width: 100%;
   display: flex;

@@ -14,11 +14,13 @@ const apiStatusConst = {
   success: 'SUCCESS',
   failure: 'FAILURE',
 }
+let intervalId
 class YourSelectedPlaylist extends Component {
   state = {
     specificPlaylistApiStatus: apiStatusConst.loading,
     currentSelectedTrack: '',
     specificPlaylistData: {},
+    failureCount: 5,
   }
 
   componentDidMount() {
@@ -58,7 +60,34 @@ class YourSelectedPlaylist extends Component {
         specificPlaylistApiStatus: apiStatusConst.success,
         specificPlaylistData: fetchedData,
       })
+    } else {
+      this.setState(
+        {specificPlaylistApiStatus: apiStatusConst.failure},
+        this.runFailureCount,
+      )
     }
+  }
+
+  clearFailureInterval = () => {
+    const {failureCount} = this.state
+    if (failureCount === 0 || failureCount < 0) {
+      clearInterval(intervalId)
+      const {history} = this.props
+      Cookies.remove('pa_token')
+      history.replace('/login')
+    }
+  }
+
+  runFailureCount = () => {
+    const {audio} = this.props
+    audio.pause()
+    audio.currentTime = 0
+    intervalId = setInterval(() => {
+      this.setState(
+        preState => ({failureCount: preState.failureCount - 1}),
+        this.clearFailureInterval,
+      )
+    }, 1000)
   }
 
   getAddedAt = added => {
@@ -173,6 +202,17 @@ class YourSelectedPlaylist extends Component {
     const {specificPlaylistData} = this.state
     const {imageUrl, name, tracks} = specificPlaylistData
     const {total, items} = tracks
+
+    const previewUrlFilteredItems = items.filter(each => {
+      if (
+        each.track.preview_url === null ||
+        each.track.preview_url === undefined ||
+        each.track.preview_url === ''
+      ) {
+        return false
+      }
+      return true
+    })
     return (
       <div className="your-selected-playlist-container-desktop">
         <Navbar currentSelected="PLAYLISTS" />
@@ -229,13 +269,17 @@ class YourSelectedPlaylist extends Component {
           </div>
           <hr className="your-selected-playlist-rule" />
 
-          {items.length === 0 ? (
+          {previewUrlFilteredItems.length === 0 ? (
             this.renderNoTracksView()
           ) : (
             <ul className="your-selected-playlist-tracks-container">
-              {items.map(eachItem => {
+              {previewUrlFilteredItems.map(eachItem => {
                 index += 1
-                return this.renderTrackItem(eachItem, index, items)
+                return this.renderTrackItem(
+                  eachItem,
+                  index,
+                  previewUrlFilteredItems,
+                )
               })}
             </ul>
           )}
@@ -289,8 +333,18 @@ class YourSelectedPlaylist extends Component {
     const {specificPlaylistData} = this.state
     const {imageUrl, name, tracks} = specificPlaylistData
     const {total, items} = tracks
-
     let index = 0
+
+    const previewUrlFilteredItems = items.filter(each => {
+      if (
+        each.track.preview_url === null ||
+        each.track.preview_url === undefined ||
+        each.track.preview_url === ''
+      ) {
+        return false
+      }
+      return true
+    })
 
     return (
       <div className="your-selected-playlist-container-mobile">
@@ -326,13 +380,17 @@ class YourSelectedPlaylist extends Component {
             </p>
           </div>
 
-          {items.length === 0 ? (
+          {previewUrlFilteredItems.length === 0 ? (
             this.renderNoTracksView()
           ) : (
             <ul className="your-selected-playlist-tracks-mobile">
-              {items.map(eachItem => {
+              {previewUrlFilteredItems.map(eachItem => {
                 index += 1
-                return this.renderTrackItemMobile(eachItem, items, index)
+                return this.renderTrackItemMobile(
+                  eachItem,
+                  previewUrlFilteredItems,
+                  index,
+                )
               })}
             </ul>
           )}
@@ -351,6 +409,32 @@ class YourSelectedPlaylist extends Component {
     </>
   )
 
+  renderFailure = () => {
+    const {failureCount} = this.state
+    return (
+      <PlayerContext.Consumer>
+        {value => {
+          const {audio} = value
+          audio.pause()
+          audio.currentTime = 0
+          return (
+            <div className="failure-container">
+              <img
+                src="https://res.cloudinary.com/maheshnaiducloudinary/image/upload/v1633941997/My%20Spotify%20Clone/My%20Spotify%20Logo/My_Spotify_Logo_s05z7j.png"
+                alt="Spotify"
+                className="login-website-logo-desktop-image"
+              />
+              <h1 className="failure-heading-1">Oops! Something went wrong</h1>
+              <p className="failure-heading-2">
+                Redirecting to login in {failureCount} seconds...
+              </p>
+            </div>
+          )
+        }}
+      </PlayerContext.Consumer>
+    )
+  }
+
   renderUI = () => {
     const {specificPlaylistApiStatus} = this.state
     switch (specificPlaylistApiStatus) {
@@ -358,6 +442,8 @@ class YourSelectedPlaylist extends Component {
         return <Loader />
       case apiStatusConst.success:
         return this.renderResponsivePlaylist()
+      case apiStatusConst.failure:
+        return this.renderFailure()
       default:
         return null
     }

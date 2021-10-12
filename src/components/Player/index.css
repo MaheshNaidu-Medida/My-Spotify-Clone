@@ -7,12 +7,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 @media screen and (min-width: 768px) {
   .player {
     width: calc(100% - 80px);
     padding: 5px 10px 1px 10px;
   }
+}
+.player-state-toggle-on {
+  color: #1db954;
+  font-size: 30px;
+  margin-right: 5px;
+  cursor: pointer;
+  outline: none;
+}
+.player-state-toggle-off {
+  color: #ffffff;
+  font-size: 30px;
+  margin-right: 5px;
+  cursor: pointer;
+  outline: none;
 }
 .player-details {
   width: 60%;
@@ -22,7 +37,7 @@
 }
 @media screen and (min-width: 768px) {
   .player-details {
-    width: 15%;
+    width: 25%;
   }
 }
 .player-preview-image {
@@ -41,10 +56,13 @@
   transform: scale(1.1);
   filter: brightness(110%);
   filter: contrast(110%);
+  cursor: pointer;
 }
 .player-preview-no-image {
   width: 40px;
   height: 40px;
+  border-radius: 2px;
+  margin-right: 1px;
   background-color: #282828;
   display: flex;
   justify-content: center;
@@ -56,8 +74,14 @@
     height: 50px;
   }
 }
+.player-preview-no-image:hover {
+  transform: scale(1.1);
+  filter: brightness(110%);
+  filter: contrast(110%);
+  cursor: pointer;
+}
 .player-no-image-icon {
-  font-size: 14px;
+  font-size: 16px;
   color: #ffffff;
 }
 @media screen and (min-width: 768px) {
@@ -78,8 +102,8 @@
 }
 @media screen and (min-width: 768px) {
   .player-title-details {
-    margin-left: 4px;
-    margin-right: 4px;
+    margin-left: 6px;
+    margin-right: 5px;
     height: 50px;
   }
 }
@@ -87,29 +111,42 @@
   max-width: 100%;
   color: #ffffff;
   font-family: 'Roboto';
-  font-size: 10px;
+  font-size: 14px;
   margin-bottom: 0;
+  margin-top: 0px;
+  height: 20px;
+  overflow: hidden;
 }
 @media screen and (min-width: 768px) {
   .player-track-name {
-    font-size: 10px;
+    font-size: 12px;
+    height: 40px;
   }
 }
 .player-track-artist {
   max-width: 100%;
   color: #9b9b9b;
   font-family: 'Roboto';
-  font-size: 10px;
-  margin-top: 0;
+  font-size: 12px;
+  margin-top: 3px;
+  height: 10px;
 }
 @media screen and (min-width: 768px) {
   .player-track-artist {
     font-size: 10px;
   }
 }
+.player-track-artist:hover {
+  filter: brightness(120%);
+  cursor: pointer;
+}
+.player-track-name:hover {
+  filter: brightness(200%);
+  cursor: pointer;
+}
 .player-large-devices {
   display: block;
-  width: 80%;
+  width: 75%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -151,10 +188,15 @@
   filter: brightness(115%);
 }
 .play-pause-icon-small {
-  font-size: 20px;
+  font-size: 36px;
   color: #ffffff;
   margin-right: 5px;
   cursor: pointer;
+  outline: none;
+}
+.play-pause-icon-small:hover {
+  transform: scale(1.1);
+  filter: brightness(115%);
 }
 .slider-control-container {
   width: 75%;
@@ -181,38 +223,66 @@
   margin-right: 10px;
 }
 .player-volume-icon-large:hover {
-  transform: scale(1.1);
+  transform: scale(1.5);
   filter: brightness(115%);
 }
 .player-volume-slider {
   width: 85%;
 }
+
 .player-small-devices {
+  width: 40%;
   display: block;
   display: flex;
+  justify-content: center;
   align-items: center;
 }
+.player-slider-small {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
 @media screen and (min-width: 768px) {
   .player-small-devices {
     display: none;
   }
+  .player-slider-small {
+    display: none;
+  }
 }
-
 input[type='range'] {
   -webkit-appearance: none;
-  height: 2px;
+  height: 1px;
   cursor: pointer;
   outline: none;
   background-color: #1db954;
 }
-
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 2px;
-  width: 2px;
+  height: 4px;
+  width: 4px;
   border-radius: 50%;
   background-color: #ffffff;
 }
 input[type='range']:hover::-webkit-slider-thumb {
-  transform: scale(8);
+  margin-top: 0px;
+  margin-bottom: 1px;
+  transform: scale(3);
+}
+
+@media screen and (min-width: 768px) {
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 2px;
+    width: 2px;
+    border-radius: 50%;
+    background-color: #ffffff;
+  }
+  input[type='range']:hover::-webkit-slider-thumb {
+    margin-top: 2px;
+    transform: scale(8.5);
+  }
 }

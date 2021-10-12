@@ -14,11 +14,12 @@ const apiStatusConst = {
   success: 'SUCCESS',
   failure: 'FAILURE',
 }
-
+let intervalId
 class SpecificAlbum extends Component {
   state = {
     specificAlbumApiStatus: apiStatusConst.loading,
     specificAlbumData: {},
+    failureCount: 5,
   }
 
   componentDidMount() {
@@ -54,7 +55,34 @@ class SpecificAlbum extends Component {
         specificAlbumApiStatus: apiStatusConst.success,
         specificAlbumData: fetchedData,
       })
+    } else {
+      this.setState(
+        {specificAlbumApiStatus: apiStatusConst.failure},
+        this.runFailureCount,
+      )
     }
+  }
+
+  clearFailureInterval = () => {
+    const {failureCount} = this.state
+    if (failureCount === 0 || failureCount < 0) {
+      clearInterval(intervalId)
+      const {history} = this.props
+      Cookies.remove('pa_token')
+      history.replace('/login')
+    }
+  }
+
+  runFailureCount = () => {
+    const {audio} = this.props
+    audio.pause()
+    audio.currentTime = 0
+    intervalId = setInterval(() => {
+      this.setState(
+        preState => ({failureCount: preState.failureCount - 1}),
+        this.clearFailureInterval,
+      )
+    }, 1000)
   }
 
   getDurationInMinsHeader = duration => {
@@ -91,36 +119,50 @@ class SpecificAlbum extends Component {
 
   renderNoTracksView = () => (
     <div className="specific-album-no-tracks-view">
-      <p className="specific-album-heading-mobile text-color-2">No Tracks</p>
+      <p className="specific-album-no-tracks-heading text-color-2">NO TRACKS</p>
     </div>
   )
 
-  renderTrackItem = (eachTrack, index) => {
-    const {id, name} = eachTrack
-    const duration = eachTrack.duration_ms
-    const durationInMins = this.getDurationInMins(duration)
+  renderTrackItem = (eachTrack, index, items, images) => (
+    <PlayerContext.Consumer>
+      {value => {
+        const {onAddTrack} = value
+        const {id, name} = eachTrack.track
 
-    const {currentSelectedTrack} = this.state
-    const trackStyle =
-      currentSelectedTrack === id ? 'specific-album-selected-track' : ''
-    return (
-      <li key={id} className={`specific-album-track ${trackStyle}`}>
-        <p className="specific-album-text text-color-1 specific-playlist-index-item">
-          {index}
-        </p>
-        <p className="specific-album-text text-color-1 specific-album-track-item">
-          {name}
-        </p>
+        const previewUrl = eachTrack.track.preview_url
+        const artist = eachTrack.track.artists[0].name
 
-        <p className="specific-album-text text-color-1 specific-album-time-item">
-          {durationInMins}
-        </p>
-        <p className="specific-album-text text-color-1 specific-album-popularity-item">
-          Popularity
-        </p>
-      </li>
-    )
-  }
+        const onClickSong = () =>
+          onAddTrack({name, previewUrl, artist, images, index}, items)
+        const duration = eachTrack.track.duration_ms
+        const durationInMins = this.getDurationInMins(duration)
+        const {currentSelectedTrack} = this.state
+        const trackStyle =
+          currentSelectedTrack === id ? 'specific-album-selected-track' : ''
+        return (
+          <li
+            key={id}
+            className={`specific-album-track ${trackStyle}`}
+            onClick={onClickSong}
+          >
+            <p className="specific-album-text text-color-1 specific-playlist-index-item">
+              {index}
+            </p>
+            <p className="specific-album-text text-color-1 specific-album-track-item">
+              {name}
+            </p>
+
+            <p className="specific-album-text text-color-1 specific-album-time-item">
+              {durationInMins}
+            </p>
+            <p className="specific-album-text text-color-1 specific-album-popularity-item">
+              3
+            </p>
+          </li>
+        )
+      }}
+    </PlayerContext.Consumer>
+  )
 
   renderSpecificAlbumDesktop = () => {
     let index = 0
@@ -135,6 +177,31 @@ class SpecificAlbum extends Component {
       albumType,
     } = specificAlbumData
     const {items} = tracks
+
+    const previewUrlFilteredItems = items.filter(each => {
+      if (
+        each.preview_url === null ||
+        each.preview_url === undefined ||
+        each.preview_url === ''
+      ) {
+        return false
+      }
+      return true
+    })
+
+    const modifiedAlbumData = previewUrlFilteredItems.map(each => ({
+      track: {
+        id: each.id,
+        name: each.name,
+        duration_ms: each.duration_ms,
+        artists,
+        preview_url: each.preview_url,
+        album: {
+          images,
+        },
+      },
+    }))
+
     const releaseYear = new Date(releaseDate).getFullYear()
     let totalDuration = 0
     tracks.items.forEach(element => {
@@ -193,13 +260,18 @@ class SpecificAlbum extends Component {
           </div>
           <hr className="specific-album-rule" />
 
-          {items.length === 0 ? (
+          {modifiedAlbumData.length === 0 ? (
             this.renderNoTracksView()
           ) : (
             <ul className="specific-album-tracks-container">
-              {items.map(eachItem => {
+              {modifiedAlbumData.map(eachItem => {
                 index += 1
-                return this.renderTrackItem(eachItem, index)
+                return this.renderTrackItem(
+                  eachItem,
+                  index,
+                  modifiedAlbumData,
+                  images,
+                )
               })}
             </ul>
           )}
@@ -211,33 +283,54 @@ class SpecificAlbum extends Component {
     )
   }
 
-  renderTrackItemMobile = eachTrack => {
-    const {id, name, artists} = eachTrack
-    const duration = eachTrack.duration_ms
-    const durationInMins = this.getDurationInMins(duration)
-    const {currentSelectedTrack} = this.state
-    const trackStyle =
-      currentSelectedTrack === id ? 'specific-album-selected-track' : ''
-    return (
-      <li key={id} className={`specific-album-track-mobile ${trackStyle}`}>
-        <div className="specific-album-track-details-mobile">
-          <p className="specific-album-track-name-mobile text-color-2">
-            {name}
-          </p>
-          <p className="your-selected-playlist-text-mobile text-color-5">
-            {artists[0].name}
-          </p>
-        </div>
-        <p className="your-selected-playlist-text-mobile text-color-5">
-          {durationInMins}
-        </p>
-      </li>
-    )
-  }
+  renderTrackItemMobile = (eachTrack, index, items, images) => (
+    <PlayerContext.Consumer>
+      {value => {
+        const {onAddTrack} = value
+        const {id, name} = eachTrack.track
+        const artist = eachTrack.track.artists[0].name
+        const previewUrl = eachTrack.track.preview_url
+        const onClickSong = () => {
+          onAddTrack({name, previewUrl, artist, images, index}, items)
+        }
+        const duration = eachTrack.track.duration_ms
+        const durationInMins = this.getDurationInMins(duration)
+        const {currentSelectedTrack} = this.state
+        const trackStyle =
+          currentSelectedTrack === id ? 'specific-album-selected-track' : ''
+        return (
+          <li
+            key={id}
+            className={`specific-album-track-mobile ${trackStyle}`}
+            onClick={onClickSong}
+          >
+            <div className="specific-album-track-details-mobile">
+              <p className="specific-album-track-name-mobile text-color-2">
+                {name}
+              </p>
+              <p className="your-selected-playlist-text-mobile text-color-5">
+                {artist}
+              </p>
+            </div>
+            <p className="your-selected-playlist-text-mobile text-color-5">
+              {durationInMins}
+            </p>
+          </li>
+        )
+      }}
+    </PlayerContext.Consumer>
+  )
 
   renderSpecificAlbumMobile = () => {
     const {specificAlbumData} = this.state
-    const {images, name, releaseDate, total, tracks} = specificAlbumData
+    const {
+      images,
+      name,
+      releaseDate,
+      total,
+      tracks,
+      artists,
+    } = specificAlbumData
     const {items} = tracks
     const imageUrl = images[0].url
     const release = new Date(releaseDate)
@@ -247,6 +340,31 @@ class SpecificAlbum extends Component {
       totalDuration += element.duration_ms
     })
     totalDuration = this.getDurationInMinsHeader(totalDuration)
+
+    const previewUrlFilteredItems = items.filter(each => {
+      if (
+        each.preview_url === null ||
+        each.preview_url === undefined ||
+        each.preview_url === ''
+      ) {
+        return false
+      }
+      return true
+    })
+    const modifiedAlbumData = previewUrlFilteredItems.map(each => ({
+      track: {
+        id: each.id,
+        name: each.name,
+        preview_url: each.preview_url,
+        duration_ms: each.duration_ms,
+        artists,
+        album: {
+          images,
+        },
+      },
+    }))
+
+    let index = 0
 
     return (
       <div className="specific-album-container-mobile">
@@ -279,11 +397,19 @@ class SpecificAlbum extends Component {
               {this.renderTotalTracks(total)}
             </p>
           </div>
-          {items.length === 0 ? (
+          {modifiedAlbumData.length === 0 ? (
             this.renderNoTracksView()
           ) : (
             <ul className="specific-album-tracks-mobile">
-              {items.map(eachItem => this.renderTrackItemMobile(eachItem))}
+              {modifiedAlbumData.map(eachItem => {
+                index += 1
+                return this.renderTrackItemMobile(
+                  eachItem,
+                  index,
+                  modifiedAlbumData,
+                  images,
+                )
+              })}
             </ul>
           )}
         </div>
@@ -301,6 +427,32 @@ class SpecificAlbum extends Component {
     </div>
   )
 
+  renderFailure = () => {
+    const {failureCount} = this.state
+    return (
+      <PlayerContext.Consumer>
+        {value => {
+          const {audio} = value
+          audio.pause()
+          audio.currentTime = 0
+          return (
+            <div className="failure-container">
+              <img
+                src="https://res.cloudinary.com/maheshnaiducloudinary/image/upload/v1633941997/My%20Spotify%20Clone/My%20Spotify%20Logo/My_Spotify_Logo_s05z7j.png"
+                alt="Spotify"
+                className="login-website-logo-desktop-image"
+              />
+              <h1 className="failure-heading-1">Oops! Something went wrong</h1>
+              <p className="failure-heading-2">
+                Redirecting to login in {failureCount} seconds...
+              </p>
+            </div>
+          )
+        }}
+      </PlayerContext.Consumer>
+    )
+  }
+
   renderUI = () => {
     const {specificAlbumApiStatus} = this.state
     switch (specificAlbumApiStatus) {
@@ -308,6 +460,8 @@ class SpecificAlbum extends Component {
         return <Loader />
       case apiStatusConst.success:
         return this.renderResponsiveAlbum()
+      case apiStatusConst.failure:
+        return this.renderFailure()
       default:
         return null
     }
